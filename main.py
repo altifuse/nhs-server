@@ -1,10 +1,62 @@
-from dataclasses import dataclass
+from __future__ import annotations
 
+from dataclasses import dataclass
+from typing import Optional
+
+from paho.mqtt import client as mqtt
 from serial import Serial, PARITY_NONE, STOPBITS_ONE, EIGHTBITS
 from serial.threaded import ReaderThread, FramedPacket
 
 # SERIAL_PORT = "/dev/TTYS3"
 SERIAL_PORT = "COM4"
+
+
+class MQTTTopic:
+    def __init__(self, name: str):
+        self._name = name
+
+    def publish(self, payload):
+        pass
+
+
+class NHSMQTTEntity:
+    STATE_OFF = 'OFF'
+    STATE_ON = 'ON'
+    STATE_UNKNOWN = 'UNKNOWN'
+    MINIMUM_PUBLISH_RATE = 5
+
+    def __init__(self, root_topic_name: str = 'NHSUPS'):
+        self._mqtt_client = mqtt.Client("nhs-server")
+        self._attributes_topic = MQTTTopic(f'{root_topic_name}/attributes')
+        self._lwt_topic = MQTTTopic(f'{root_topic_name}/LWT')
+        self._state_topic = MQTTTopic(f'{root_topic_name}/state')
+        self._latest_packet: Optional[NHSProtocol] = None
+        self._last_published_age = 0
+
+        # TODO
+        #  authenticate
+        #  set will
+        #  connect
+        #  publish online
+
+    def update(self, packet: NHSProtocol):
+        if packet != self._latest_packet or self.outdated:
+            self._state_topic.publish(self._get_state_payload(packet))
+            self._attributes_topic.publish(self._get_attributes_payload(packet))
+            self._last_published_age = 0
+        else:
+            self._last_published_age += 1
+
+    @property
+    def outdated(self):
+        return self._last_published_age >= self.MINIMUM_PUBLISH_RATE
+
+    def _get_state_payload(self, packet: NHSProtocol) -> str:
+        return self.STATE_OFF if packet.network_down else self.STATE_ON
+
+    @staticmethod
+    def _get_attributes_payload(packet: NHSProtocol) -> dict:
+        return vars(packet)
 
 
 @dataclass
@@ -25,6 +77,9 @@ class NHSProtocol:
     rms_out_220: bool
     bypass_on: bool
     charging: bool
+
+    def __eq__(self, other: NHSProtocol) -> bool:
+        return self.network_down == other.network_down
 
 
 class NHSSerialReader(FramedPacket):
