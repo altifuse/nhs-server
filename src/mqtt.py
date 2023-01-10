@@ -9,9 +9,9 @@ from nhs import NHSProtocol
 
 
 class NHSMQTTEntity:
-    STATE_OFF = 'OFF'
-    STATE_ON = 'ON'
-    STATE_UNKNOWN = 'UNKNOWN'
+    STATE_OFF = 0
+    STATE_ON = 1
+    STATE_UNKNOWN = -1
 
     def __init__(self, *, root_topic_name: str = 'NHSUPS', host: str = 'localhost', port: int = 1883,
                  username: str = None, password: str = None, max_time_between_messages_in_seconds: int = 5):
@@ -51,7 +51,8 @@ class NHSMQTTEntity:
         self._mqtt_client.loop_start()
 
     def _get_state_payload(self, *, packet: NHSProtocol) -> str:
-        return self.STATE_OFF if packet.grid_down else self.STATE_ON
+        state = self.STATE_OFF if packet.grid_down else self.STATE_ON
+        return json.dumps({'state': state})
 
     @staticmethod
     def _get_attributes_payload(*, packet: NHSProtocol) -> str:

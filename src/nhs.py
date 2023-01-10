@@ -13,14 +13,14 @@ class NHSProtocol:
     rms_out_volts: int
     temp_celsius: int
     charger_amperes: float
-    battery_on: bool
-    low_battery: bool
-    grid_down: bool
-    grid_short_outage: bool
-    rms_in_220: bool
-    rms_out_220: bool
-    bypass_on: bool
-    charging: bool
+    battery_on: int
+    low_battery: int
+    grid_down: int
+    grid_short_outage: int
+    rms_in_220: int
+    rms_out_220: int
+    bypass_on: int
+    charging: int
 
     def __eq__(self, other: NHSProtocol) -> bool:
         return not other or self.grid_down == other.grid_down

@@ -45,14 +45,14 @@ class _NHSSerialReader(FramedPacket):
                 rms_out_volts=packet[11] + packet[12],
                 temp_celsius=packet[13] + packet[14],
                 charger_amperes=packet[15] * 750 / 25,
-                battery_on=bool(status_raw[7]),
-                low_battery=bool(status_raw[6]),
-                grid_down=bool(status_raw[5]),
-                grid_short_outage=bool(status_raw[4]),
-                rms_in_220=bool(status_raw[3]),
-                rms_out_220=bool(status_raw[2]),
-                bypass_on=bool(status_raw[1]),
-                charging=bool(status_raw[0])
+                battery_on=status_raw[7],
+                low_battery=status_raw[6],
+                grid_down=status_raw[5],
+                grid_short_outage=status_raw[4],
+                rms_in_220=status_raw[3],
+                rms_out_220=status_raw[2],
+                bypass_on=status_raw[1],
+                charging=status_raw[0]
             )
         )
 
