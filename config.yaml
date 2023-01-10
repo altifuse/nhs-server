@@ -1,0 +1,5 @@
+serial:
+  port: COM4
+
+mqtt:
+  host: ganymede.local
