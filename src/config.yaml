@@ -1,0 +1,5 @@
+serial:
+  port: "/dev/ttyS0"
+
+mqtt:
+  host: "ganymede.local"
