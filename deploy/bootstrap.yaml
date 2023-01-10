@@ -1,0 +1,39 @@
+---
+- name: Set up NHS Server
+  hosts: ganymede
+  vars:
+    project_path: /srv/projects/nhsserver
+    service_name: nhsserver
+  vars_files:
+  - "{{ secrets_path }}"
+
+  tasks:
+  - name: Ensure project directory exists
+    become: yes
+    file:
+      path: "{{ project_path }}"
+      state: directory
+      mode: '0755'
+
+  - name: Upload source files
+    become: yes
+    copy:
+      src: ../src/
+      dest: "{{ project_path }}"
+
+  - name: Upload deployment files
+    become: yes
+    copy:
+      src: ./
+      dest: "{{ project_path }}"
+
+  - name: Stop container
+    docker_compose:
+      project_src: "{{ project_path }}"
+      state: absent
+  
+  - name: Run container
+    docker_compose:
+      project_src: "{{ project_path }}"
+      build: yes
+  
