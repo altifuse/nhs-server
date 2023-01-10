@@ -1,0 +1,18 @@
+---
+version: "3.9"
+services:
+  nhsserver:
+    build: .
+    container_name: nhsserver
+    mem_limit: 64m
+    networks:
+      - ganymede
+    restart: unless-stopped
+    devices:
+      - /dev/ttyUSB0:/dev/ttyS0
+    volumes:
+      - ./config.yaml:/config.yaml
+
+networks:
+  ganymede:
+    external: true
