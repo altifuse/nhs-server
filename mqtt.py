@@ -15,6 +15,7 @@ class NHSMQTTEntity:
 
     def __init__(self, *, root_topic_name: str = 'NHSUPS', host: str = 'localhost', port: int = 1883,
                  username: str = None, password: str = None, max_time_between_messages_in_seconds: int = 5):
+        print(f'Initializing MQTT entity in root topic {root_topic_name} at {host}:{port}...')
         self._mqtt_client = mqtt.Client('nhs-server')
         self._attributes_topic = _MQTTTopic(name=f'{root_topic_name}/attributes', client=self._mqtt_client)
         self._lwt_topic = _MQTTTopic(name=f'{root_topic_name}/LWT', client=self._mqtt_client)
@@ -28,10 +29,12 @@ class NHSMQTTEntity:
 
     def update(self, packet: NHSProtocol) -> None:
         if packet != self._latest_packet or self.outdated:
+            print('Publishing...')
             self._state_topic.publish(payload=self._get_state_payload(packet=packet))
             self._attributes_topic.publish(payload=self._get_attributes_payload(packet=packet))
             self._latest_packet = packet
             self._last_published_age = 0
+            print('Published.')
         else:
             self._last_published_age += 1
 

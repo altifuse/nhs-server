@@ -9,11 +9,13 @@ from nhs import NHSProtocol
 class NHSSerialListener:
     def __init__(self, *, callback, port='/dev/TTYS0', baud_rate=2400, byte_size=EIGHTBITS, parity=PARITY_NONE,
                  stop_bits=STOPBITS_ONE, xonxoff=False, rtscts=False, dsrdtr=False):
+        print(f'Initializing serial listener on {port}...')
         listener = Serial(port=port, baudrate=baud_rate, bytesize=byte_size, parity=parity, stopbits=stop_bits,
                           xonxoff=xonxoff, rtscts=rtscts, dsrdtr=dsrdtr)
         self._reader = ReaderThread(listener, _NHSSerialReader.get_factory(callback=callback))
 
     def start(self) -> None:
+        print('Running...')
         self._reader.run()
 
 
@@ -25,6 +27,7 @@ class _NHSSerialReader(FramedPacket):
     def __init__(self, *, callback):
         super().__init__()
         self._callback = callback
+        print('Serial packet reader initialized.')
 
     def handle_packet(self, packet: bytearray) -> None:
         if self._is_packet_incomplete(packet=packet):
